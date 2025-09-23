@@ -82,6 +82,10 @@ void drive_control(pros::Controller& master) {
     Front_left.move(y - x + turn);
     back_right.move(y - x - turn);
     front_right.move(y + x - turn);
+    Top_front_Left.move(y - x + turn);
+    Top_back_Left.move(y + x + turn);
+    Top_front_Right.move(y + x - turn);
+    Top_back_Right.move(y - x - turn);
 }
 
 
