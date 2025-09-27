@@ -7,14 +7,17 @@
  *                              Motor Definitions
  ******************************************************************************/
 // Drive Train
-pros::Motor Back_left(1, pros::v5::MotorGears::blue);
-pros::Motor Front_left(10, pros::v5::MotorGears::blue);
-pros::Motor front_right(-11, pros::v5::MotorGears::blue);
-pros::Motor back_right(-20, pros::v5::MotorGears::blue);
-pros::Motor Top_front_Left(5, pros::v5::MotorGears::green);
-pros::Motor Top_front_Right(15, pros::v5::MotorGears::green);
-pros::Motor Top_back_Left(17, pros::v5::MotorGears::green);
-pros::Motor Top_back_Right(6, pros::v5::MotorGears::green);
+pros::Motor Back_left(-1, pros::v5::MotorGears::blue);
+pros::Motor Top_back_Left(-2, pros::v5::MotorGears::green);
+
+pros::Motor Front_left(-10, pros::v5::MotorGears::blue);
+pros::Motor Top_front_Left(-9, pros::v5::MotorGears::green);
+
+pros::Motor front_right(20, pros::v5::MotorGears::blue);
+pros::Motor Top_front_Right(19, pros::v5::MotorGears::green);
+
+pros::Motor back_right(11, pros::v5::MotorGears::blue);
+pros::Motor Top_back_Right(12, pros::v5::MotorGears::green);
 
 
 /******************************************************************************
@@ -41,6 +44,10 @@ Back_left.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
 Front_left.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
 front_right.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
 back_right.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
+Top_front_Left.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
+Top_front_Right.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
+Top_back_Left.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
+Top_back_Right.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
 } 
 
 /**
