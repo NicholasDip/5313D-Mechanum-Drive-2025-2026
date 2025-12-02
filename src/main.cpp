@@ -19,6 +19,10 @@ pros::Motor Top_front_Right(19, pros::v5::MotorGears::green);
 pros::Motor back_right(11, pros::v5::MotorGears::blue);
 pros::Motor Top_back_Right(12, pros::v5::MotorGears::green);
 
+pros::Motor intake_bottom(3, pros::v5::MotorGears::green);
+pros::Motor intake_top(4, pros::v5::MotorGears::green);
+pros::Motor intake_flex(5, pros::v5::MotorGears::green);
+
 
 /******************************************************************************
  *                              Function Prototypes
@@ -36,6 +40,7 @@ void on_center_button() {
 
 // Declare console pointer at file scope
 rd::Console* console = nullptr;
+bool intake_flex_reversed = false;
 
 void initialize() {
     console = new rd::Console("Motor Temps");
@@ -112,6 +117,7 @@ void opcontrol() {
 	   console->println("Top_back_Left: " + std::to_string(Top_back_Left.get_temperature()));
 	   console->println("Top_back_Right: " + std::to_string(Top_back_Right.get_temperature()));
         drive_control(master);
+        intake_control(master);
         
         if (pros::millis() - lastClearTime > clearInterval) {
             console->clear();
@@ -121,4 +127,33 @@ void opcontrol() {
     }
 }
 
-
+void intake_control(pros::Controller& master) {
+    // Macro button to toggle intake_flex direction
+    static bool last_x_state = false;
+    bool current_x_state = master.get_digital(pros::E_CONTROLLER_DIGITAL_X);
+    
+    // Toggle on button press (rising edge detection)
+    if (current_x_state && !last_x_state) {
+        intake_flex_reversed = !intake_flex_reversed;
+    }
+    last_x_state = current_x_state;
+    
+    // Normal intake controls
+    if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R1)) {
+        intake_bottom.move_velocity(200);
+        intake_top.move_velocity(200);
+        // Apply reversal to intake_flex if macro is active
+        intake_flex.move_velocity(intake_flex_reversed ? -200 : 200);
+    } 
+    else if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R2)) {
+        intake_bottom.move_velocity(-200);
+        intake_top.move_velocity(-200);
+        // Apply reversal to intake_flex if macro is active
+        intake_flex.move_velocity(intake_flex_reversed ? 200 : -200);
+    }
+    else {
+        intake_bottom.move_velocity(0);
+        intake_top.move_velocity(0);
+        intake_flex.move_velocity(0);
+    }
+}
