@@ -18,7 +18,7 @@ This project is a PROS-based VEX V5 robot codebase using RoboDash for autonomous
 
 ## Autonomous Selection
 Autonomous routines are defined in `Auton.cpp` and registered with RoboDash's Selector widget. The selected routine runs automatically in competition mode. one item can have is own autonmous path. 
-For example {"red_left_auton", red_left_auton}, that can be coded with a path specified for red side left. Allowing versatility across the field in all scenarios 
+For example {"red_left_auton", red_left_auton}, that can be coded with a path specifically for red side left. Allowing versatility across the field in all scenarios 
 
 Example:
 ```cpp
