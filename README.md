@@ -1,7 +1,7 @@
 # Mecha VEX Robotics Project
 
 ## Overview
-This project is a PROS-based VEX V5 robot codebase using RoboDash for autonomous selection and monitoring. It is organized for clarity and modularity, with autonomous routines separated from main control logic.
+This project is a PROS-based VEX V5 robot codebase using RoboDash for autonomous selection and monitoring. It is organized for clarity and modularity, with autonomous routines separated from main control logic. Set to be used during VEX Pushback 2025-2026
 
 ## Features
 - Modular autonomous routines with RoboDash Selector
