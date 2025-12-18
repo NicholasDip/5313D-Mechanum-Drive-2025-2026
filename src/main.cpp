@@ -13,7 +13,7 @@ pros::Motor Top_back_Left(-2, pros::v5::MotorGears::green);
 pros::Motor Front_left(-10, pros::v5::MotorGears::blue);
 pros::Motor Top_front_Left(-9, pros::v5::MotorGears::green);
 
-pros::Motor front_right(10, pros::v5::MotorGears::blue);
+pros::Motor front_right(20, pros::v5::MotorGears::blue);
 pros::Motor Top_front_Right(19, pros::v5::MotorGears::green);
 
 pros::Motor back_right(11, pros::v5::MotorGears::blue);
