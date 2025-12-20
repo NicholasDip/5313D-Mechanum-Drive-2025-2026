@@ -23,6 +23,11 @@ pros::Motor intake_bottom(3, pros::v5::MotorGears::green);
 pros::Motor intake_top(4, pros::v5::MotorGears::green);
 pros::Motor intake_flex(5, pros::v5::MotorGears::green);
 
+/******************************************************************************
+ *                              Sensor Definitions
+ ******************************************************************************/
+pros::ADIDigitalOut piston('A'); //
+bool isPistonOpen = false;
 
 /******************************************************************************
  *                              Function Prototypes
@@ -119,6 +124,12 @@ void opcontrol() {
         drive_control(master);
         intake_control(master);
         
+        // Pneumatic control - Toggle with L1 button
+        if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_A)) {
+            isPistonOpen = !isPistonOpen;
+            piston.set_value(isPistonOpen);
+        }
+        
         if (pros::millis() - lastClearTime > clearInterval) {
             console->clear();
             lastClearTime = pros::millis();
@@ -127,6 +138,10 @@ void opcontrol() {
     }
 }
 
+
+/******************************************************************************
+ *                           Driver Control Functions
+ ******************************************************************************/
 void intake_control(pros::Controller& master) {
     // Macro button to toggle intake_flex direction
     static bool last_x_state = false;
