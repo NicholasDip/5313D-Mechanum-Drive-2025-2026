@@ -158,13 +158,13 @@ void intake_control(pros::Controller& master) {
     
     // Normal intake controls
     if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R1)) {
-        intake_bottom.move_velocity(200);
+        intake_bottom.move_velocity(600);
         intake_top.move_velocity(200);
         // Apply reversal to intake_flex if macro is active
         intake_flex.move_velocity(intake_flex_reversed ? -200 : 200);
     } 
     else if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R2)) {
-        intake_bottom.move_velocity(-200);
+        intake_bottom.move_velocity(-600);
         intake_top.move_velocity(-200);
         // Apply reversal to intake_flex if macro is active
         intake_flex.move_velocity(intake_flex_reversed ? 200 : -200);
