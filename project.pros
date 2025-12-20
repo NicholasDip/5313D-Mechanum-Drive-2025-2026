@@ -617,8 +617,8 @@
       }
     },
     "upload_options": {
-      "slot": 2,
-      "icon": "pizza"
+      "slot": 1,
+      "icon": "pros"
     },
     "use_early_access": false
   }

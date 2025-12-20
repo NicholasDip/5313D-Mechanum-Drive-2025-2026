@@ -19,7 +19,7 @@ pros::Motor Top_front_Right(12, pros::v5::MotorGears::green);
 pros::Motor back_right(13, pros::v5::MotorGears::blue);
 pros::Motor Top_back_Right(14, pros::v5::MotorGears::green);
 
-pros::Motor intake_bottom(9, pros::v5::MotorGears::blue);
+pros::Motor intake_bottom(-9, pros::v5::MotorGears::blue);
 pros::Motor intake_top(1, pros::v5::MotorGears::green);
 pros::Motor intake_flex(10, pros::v5::MotorGears::green);
 
