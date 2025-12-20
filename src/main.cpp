@@ -7,31 +7,34 @@
  *                              Motor Definitions
  ******************************************************************************/
 // Drive Train
-pros::Motor Back_left(-1, pros::v5::MotorGears::blue);
-pros::Motor Top_back_Left(-2, pros::v5::MotorGears::green);
+pros::Motor Back_left(-18, pros::v5::MotorGears::blue);
+pros::Motor Top_back_Left(-17, pros::v5::MotorGears::green);
 
-pros::Motor Front_left(-10, pros::v5::MotorGears::blue);
-pros::Motor Top_front_Left(-9, pros::v5::MotorGears::green);
+pros::Motor Front_left(-19, pros::v5::MotorGears::blue);
+pros::Motor Top_front_Left(-20, pros::v5::MotorGears::green);
 
-pros::Motor front_right(20, pros::v5::MotorGears::blue);
-pros::Motor Top_front_Right(19, pros::v5::MotorGears::green);
+pros::Motor front_right(11, pros::v5::MotorGears::blue);
+pros::Motor Top_front_Right(12, pros::v5::MotorGears::green);
 
-pros::Motor back_right(11, pros::v5::MotorGears::blue);
-pros::Motor Top_back_Right(12, pros::v5::MotorGears::green);
+pros::Motor back_right(13, pros::v5::MotorGears::blue);
+pros::Motor Top_back_Right(14, pros::v5::MotorGears::green);
 
-pros::Motor intake_bottom(3, pros::v5::MotorGears::green);
-pros::Motor intake_top(4, pros::v5::MotorGears::green);
-pros::Motor intake_flex(5, pros::v5::MotorGears::green);
+pros::Motor intake_bottom(9, pros::v5::MotorGears::blue);
+pros::Motor intake_top(1, pros::v5::MotorGears::green);
+pros::Motor intake_flex(10, pros::v5::MotorGears::green);
 
 /******************************************************************************
  *                              Sensor Definitions
  ******************************************************************************/
-pros::ADIDigitalOut piston('A'); //
+pros::adi::DigitalOut piston('A'); //
 bool isPistonOpen = false;
 
 /******************************************************************************
  *                              Function Prototypes
  ******************************************************************************/
+void drive_control(pros::Controller& master);
+void intake_control(pros::Controller& master);
+
 void on_center_button() {
 	static bool pressed = false;
 	pressed = !pressed;
