@@ -26,7 +26,8 @@ pros::Motor intake_flex(10, pros::v5::MotorGears::green);
 /******************************************************************************
  *                              Sensor Definitions
  ******************************************************************************/
-pros::adi::DigitalOut piston('A'); //
+pros::adi::DigitalOut piston('A');
+pros::adi::DigitalOut piston('H');//
 bool isPistonOpen = false;
 
 /******************************************************************************
@@ -138,6 +139,22 @@ void opcontrol() {
             lastClearTime = pros::millis();
         }
         pros::delay(20);
+
+
+        //Matchloader Piston controls 
+        if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L1)) {
+            isPistonOpen = !isPistonOpen;
+            piston.set_value(isPistonOpen);
+        }
+        
+        if (pros::millis() - lastClearTime > clearInterval) {
+            console->clear();
+            lastClearTime = pros::millis();
+        }
+        pros::delay(20);
+
+
+
     }
 }
 
