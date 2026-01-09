@@ -2,6 +2,8 @@
 #include "api.h"
 #include "robodash/api.h"
 #include "robodash/views/console.hpp"
+#include "Odom.h"
+#include "motion.h"
 
 /******************************************************************************
  *                              Motor Definitions
@@ -27,8 +29,23 @@ pros::Motor intake_flex(10, pros::v5::MotorGears::green);
  *                              Sensor Definitions
  ******************************************************************************/
 pros::adi::DigitalOut piston('A');
-pros::adi::DigitalOut piston('H');//
+pros::adi::DigitalOut piston2('H');
 bool isPistonOpen = false;
+// Sensors
+pros::Imu imu(21);
+pros::Rotation vertical_tracking(6);
+pros::Rotation horizontal_tracking(16);
+
+// Constants (accessible to other translation units)
+const double WHEEL_DIAMETER = 4.125;
+const double TRACK_WIDTH    = 11.5;
+const double ROBOT_LENGTH   = 11.0;
+const double TICKS_PER_REV  = 360.0;
+
+// Create odom object (invert flags may need flipping after a push test)
+Odom odom(vertical_tracking, horizontal_tracking, imu, WHEEL_DIAMETER,
+          false,  // invertVertical
+          false); // invertHorizontal
 
 /******************************************************************************
  *                              Function Prototypes
@@ -46,6 +63,10 @@ void on_center_button() {
 	}
 }
 
+Odom odom(vertical_tracking, horizontal_tracking, imu, WHEEL_DIAMETER,
+          false,   // invertVertical
+          false);  // invertHorizontal
+
 
 // Declare console pointer at file scope
 rd::Console* console = nullptr;
@@ -62,6 +83,11 @@ Top_front_Left.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
 Top_front_Right.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
 Top_back_Left.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
 Top_back_Right.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
+
+pros::delay(300);
+
+odom.reset(0, 0, 0);
+  motion_init(&odom);
 } 
 
 /**
