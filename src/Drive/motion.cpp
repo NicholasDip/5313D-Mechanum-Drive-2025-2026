@@ -1,10 +1,10 @@
-
-#include "Motion.h"
+#include "motion.h"
+#include "Pid.h"
 #include "main.h"
-#include <cmath>
 #include <algorithm>
+#include <cmath>
 
-// Motors defined in main.cpp
+// Motors from main.cpp
 extern pros::Motor Back_left, Front_left, back_right, front_right;
 extern pros::Motor Top_back_Left, Top_front_Left, Top_back_Right, Top_front_Right;
 
@@ -22,42 +22,27 @@ static inline double wrap180(double deg) {
   return deg;
 }
 
-class PID {
-public:
-  PID(double p, double i, double d, double iLim = 1e9)
-    : kP(p), kI(i), kD(d), iLimit(iLim) {}
-  double step(double err) {
-    integral += err;
-    if (integral > iLimit) integral = iLimit;
-    if (integral < -iLimit) integral = -iLimit;
-    double deriv = err - prev;
-    prev = err;
-    return kP*err + kI*integral + kD*deriv;
-  }
-  void reset() { integral = 0; prev = 0; }
-private:
-  double kP, kI, kD;
-  double integral = 0;
-  double prev = 0;
-  double iLimit;
-};
-
 void motion_init(Odom* odom) { g_odom = odom; }
 
-// forward: + forward, strafe: + right, turn: + CCW
+// IMPORTANT: This mixing matches your driver control exactly.
 void set_drive_mecanum(double forward, double strafe, double turn) {
-  double fl = forward + strafe + turn;
-  double bl = forward - strafe + turn;
-  double fr = forward - strafe - turn;
-  double br = forward + strafe - turn;
+  // Match opcontrol mapping:
+  // BL: y + x + turn
+  // FL: y - x + turn
+  // BR: y - x - turn
+  // FR: y + x - turn
+  double bl = forward + strafe + turn;
+  double fl = forward - strafe + turn;
+  double br = forward - strafe - turn;
+  double fr = forward + strafe - turn;
 
-  // scale preserve ratios
   double maxMag = std::max({std::fabs(fl), std::fabs(bl), std::fabs(fr), std::fabs(br), 127.0});
   fl = fl * 127.0 / maxMag;
   bl = bl * 127.0 / maxMag;
   fr = fr * 127.0 / maxMag;
   br = br * 127.0 / maxMag;
 
+  // Apply to your 8 motors (paired)
   Front_left.move(clamp127(fl));
   Top_front_Left.move(clamp127(fl));
 
@@ -71,10 +56,16 @@ void set_drive_mecanum(double forward, double strafe, double turn) {
   Top_back_Right.move(clamp127(br));
 }
 
-void turn_to_angle(double targetDeg, double maxSpeed, double timeoutMs) {
-  PID turn(2.5, 0.01, 8.0, 5000);
+void turn_to_angle(double targetDeg, double max_speed, double timeoutMs) {
+  if (!g_odom) return;
+
+  PID turn(2.5, 0.0, 8.0);
+  turn.setOutputLimits(-max_speed, max_speed);
+  turn.setIntegralLimits(-5000, 5000);
 
   uint32_t start = pros::millis();
+  uint32_t last  = start;
+
   while (pros::millis() - start < (uint32_t)timeoutMs) {
     g_odom->update();
 
@@ -82,74 +73,85 @@ void turn_to_angle(double targetDeg, double maxSpeed, double timeoutMs) {
     double err = wrap180(targetDeg - curDeg);
     if (std::fabs(err) < 1.0) break;
 
-    double t = turn.step(err);
-    t = std::clamp(t, -maxSpeed, maxSpeed);
+    uint32_t now = pros::millis();
+    double dt = (now - last) / 1000.0;
+    last = now;
 
+    double t = turn.step(err, dt);
     set_drive_mecanum(0, 0, t);
+
     pros::delay(10);
   }
   set_drive_mecanum(0, 0, 0);
 }
 
-void move_to_point(double targetX, double targetY, double maxSpeed, double timeoutMs) {
-  PID dist(6.0, 0.0, 1.5, 5000);
-  PID turn(2.0, 0.0, 6.0, 5000);
+void move_to_point(double targetX, double targetY, double max_speed, double timeoutMs) {
+  if (!g_odom) return;
+
+  PID dist(6.0, 0.0, 1.5);
+  PID head(2.0, 0.0, 6.0);
+  dist.setOutputLimits(-max_speed, max_speed);
+  head.setOutputLimits(-max_speed, max_speed);
+  dist.setIntegralLimits(-5000, 5000);
+  head.setIntegralLimits(-5000, 5000);
 
   uint32_t start = pros::millis();
+  uint32_t last  = start;
+
   while (pros::millis() - start < (uint32_t)timeoutMs) {
     g_odom->update();
-
     Pose2D p = g_odom->getPose();
+
     double dx = targetX - p.x;
     double dy = targetY - p.y;
     double d = std::sqrt(dx*dx + dy*dy);
     if (d < 0.75) break;
 
-    // Field -> robot frame (forward/right)
-    double th = p.theta;
-    double c = std::cos(th);
-    double s = std::sin(th);
+    // Field -> robot frame (your convention: X forward, Y right)
+    double c = std::cos(p.theta);
+    double s = std::sin(p.theta);
     double forwardErr =  c * dx + s * dy;
     double strafeErr  = -s * dx + c * dy;
 
+    // Normalize to a direction
     double mag = std::max(1.0, std::sqrt(forwardErr*forwardErr + strafeErr*strafeErr));
     double dirF = forwardErr / mag;
     double dirS = strafeErr  / mag;
 
-    double speed = dist.step(d);
-    speed = std::min(speed, maxSpeed);
+    uint32_t now = pros::millis();
+    double dt = (now - last) / 1000.0;
+    last = now;
 
-    // optional slow near target
-    if (d < 6.0) speed = std::min(speed, 50.0);
+    double speed = dist.step(d, dt);
+    speed = std::min(speed, max_speed);
+
+    // Slow down near target
+    if (d < 6.0) speed = std::min(speed, 45.0);
 
     double forward = dirF * speed;
     double strafe  = dirS * speed;
 
-    // Face target
+    // Face the point while moving
     double targetDeg = std::atan2(dy, dx) * 180.0 / M_PI;
     double curDeg = g_odom->getHeadingDeg();
     double headingErr = wrap180(targetDeg - curDeg);
+    double turn = head.step(headingErr, dt);
 
-    double t = turn.step(headingErr);
-    t = std::clamp(t, -maxSpeed, maxSpeed);
-
-    set_drive_mecanum(forward, strafe, t);
+    set_drive_mecanum(forward, strafe, turn);
     pros::delay(10);
   }
 
   set_drive_mecanum(0, 0, 0);
 }
 
-void drive_distance(double inches, double maxSpeed, double timeoutMs) {
+void drive_distance(double inches, double max_speed, double timeoutMs) {
+  if (!g_odom) return;
+
   g_odom->update();
   Pose2D p = g_odom->getPose();
 
-  // Heading 0 deg faces +X in field frame (by convention)
-  double c = std::cos(p.theta);
-  double s = std::sin(p.theta);
+  double tx = p.x + inches * std::cos(p.theta);
+  double ty = p.y + inches * std::sin(p.theta);
 
-  double tx = p.x + inches * c;
-  double ty = p.y + inches * s;
-
-  move_to_point(tx, ty, maxSpeed, timeoutMs);
+  move_to_point(tx, ty, max_speed, timeoutMs);
 }

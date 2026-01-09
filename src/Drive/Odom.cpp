@@ -44,7 +44,7 @@ void Odom::update() {
   m_lastHDeg = hDeg;
 
   // Convert delta degrees -> inches
-  double dV = (dv / 360.0) * (M_PI * m_wheelDiam);
+  double dV = - (dv / 360.0) * (M_PI * m_wheelDiam);
   double dH = (dh / 360.0) * (M_PI * m_wheelDiam);
 
   if (m_invertV) dV = -dV;
