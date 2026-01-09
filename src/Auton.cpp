@@ -13,7 +13,8 @@ rd::Selector selector({
 
 void autonomous() {
   //selector.run_auton();
-  move_to_point(24, 0, 40, 2500);
+  move_to_point(24, 0, 60, 2500);
+  
 }
 
 void red_left_auton() {

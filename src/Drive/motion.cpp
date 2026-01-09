@@ -26,6 +26,10 @@ void motion_init(Odom* odom) { g_odom = odom; }
 
 // IMPORTANT: This mixing matches your driver control exactly.
 void set_drive_mecanum(double forward, double strafe, double turn) {
+  // Flip to match teleop sign convention
+  forward = -forward;
+  turn = -turn;
+  
   // Match opcontrol mapping:
   // BL: y + x + turn
   // FL: y - x + turn
@@ -88,10 +92,10 @@ void turn_to_angle(double targetDeg, double max_speed, double timeoutMs) {
 void move_to_point(double targetX, double targetY, double max_speed, double timeoutMs) {
   if (!g_odom) return;
 
-  PID dist(6.0, 0.0, 1.5);
-  PID head(2.0, 0.0, 6.0);
+  PID dist(4.0, 0.0, 0.5); //Edit these If shakey 
+  PID head(1.2, 0.0, 1.0);
   dist.setOutputLimits(-max_speed, max_speed);
-  head.setOutputLimits(-max_speed, max_speed);
+  head.setOutputLimits(-50, 50);  // Limit turn correction independently
   dist.setIntegralLimits(-5000, 5000);
   head.setIntegralLimits(-5000, 5000);
 
