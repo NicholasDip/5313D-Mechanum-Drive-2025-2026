@@ -2,7 +2,15 @@
 #include "robodash/api.h"
 
 // auton entry
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void autonomous();
+
+#ifdef __cplusplus
+}
+#endif
 
 // routines
 void red_left_auton();
