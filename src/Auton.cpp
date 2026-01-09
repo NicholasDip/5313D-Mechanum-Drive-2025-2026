@@ -15,6 +15,11 @@ void autonomous() {
   selector.run_auton();
 }
 
+
+
+//move_to_point(24, 0, 60, 2500);
+//move_to_point(X, y, Speed, Timeout)  
+
 void red_left_auton() {
 move_to_point(24, 0, 60, 2500);   // forward
   pros::delay(500);

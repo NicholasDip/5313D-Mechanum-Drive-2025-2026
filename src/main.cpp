@@ -37,10 +37,10 @@ pros::Rotation vertical_tracking(6);
 pros::Rotation horizontal_tracking(16);
 
 // Constants (accessible to other translation units)
-const double WHEEL_DIAMETER = 4.125;
-const double TRACK_WIDTH    = 11.5;
-const double ROBOT_LENGTH   = 11.0;
-const double TICKS_PER_REV  = 360.0;
+const double WHEEL_DIAMETER = 2; // Do not use Robot drivetrain wheels Use Odometry wheel size.
+//const double TRACK_WIDTH    = 11.5; // Unused currently
+//const double ROBOT_LENGTH   = 11.0; // Unused currently
+//const double TICKS_PER_REV  = 360.0;
 
 // Create odom object (invert flags may need flipping after a push test)
 Odom odom(vertical_tracking, horizontal_tracking, imu, WHEEL_DIAMETER,
