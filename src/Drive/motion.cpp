@@ -94,7 +94,7 @@ void turn_to_angle(double targetDeg, double max_speed, double timeoutMs) {
   set_drive_mecanum(0, 0, 0);
 }
 
-void move_to_point(double targetX, double targetY, double max_speed, double timeoutMs) {
+void move_to_point(double targetX, double targetY, double heading, double max_speed, double timeoutMs) {
   if (!g_odom) return;
 
   PID dist(MTP_DIST_KP, MTP_DIST_KI, MTP_DIST_KD);
@@ -116,41 +116,33 @@ void move_to_point(double targetX, double targetY, double max_speed, double time
     double d = std::sqrt(dx*dx + dy*dy);
     if (d < 0.75) break;
 
-    // Field -> robot frame (your convention: X forward, Y right)
-    double c = std::cos(p.theta);
-    double s = std::sin(p.theta);
-    double forwardErr =  c * dx + s * dy;
-    double strafeErr  = -s * dx + c * dy;
-
-    // Normalize to a direction
-    double mag = std::max(1.0, std::sqrt(forwardErr*forwardErr + strafeErr*strafeErr));
-    double dirF = forwardErr / mag;
-    double dirS = strafeErr  / mag;
-
     uint32_t now = pros::millis();
     double dt = (now - last) / 1000.0;
     last = now;
 
-    double speed = dist.step(d, dt);
-    speed = std::min(speed, max_speed);
-
-    // Slow down near target
-    if (d < 6.0) speed = std::min(speed, 45.0);
-
-    double forward = dirF * speed;
-    double strafe  = dirS * speed;
-
-    // Face the point while moving
+    // Tank-style: face target, drive forward only (no strafe)
     double targetDeg = std::atan2(dy, dx) * 180.0 / M_PI;
     double curDeg = g_odom->getHeadingDeg();
     double headingErr = wrap180(targetDeg - curDeg);
-    double turn = -head.step(headingErr, dt);  // Negate to match motor direction
+    double turn = -head.step(headingErr, dt);
 
-    set_drive_mecanum(forward, strafe, turn);
+    // Only drive forward when roughly facing target
+    double forward = 0;
+    if (std::fabs(headingErr) < 45.0) {
+      double speed = dist.step(d, dt);
+      speed = std::min(speed, max_speed);
+      if (d < 6.0) speed = std::min(speed, 45.0);  // Slow near target
+      forward = speed;
+    }
+
+    set_drive_mecanum(forward, 0, turn);  // No strafe
     pros::delay(10);
   }
 
   set_drive_mecanum(0, 0, 0);
+
+  // Turn to final heading after reaching target
+  turn_to_angle(heading, max_speed, 1000);
 }
 
 void drive_distance(double inches, double max_speed, double timeoutMs) {

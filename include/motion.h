@@ -9,6 +9,6 @@ void set_drive_mecanum(double forward, double strafe, double turn);
 
 // Motion primitives
 void turn_to_angle(double targetDeg, double max_speed = 90, double timeoutMs = 1500);
-void move_to_point(double targetX, double targetY, double max_speed = 90, double timeoutMs = 2500);
+void move_to_point(double targetX, double targetY, double heading, double max_speed = 90, double timeoutMs = 2500);
 void drive_distance(double inches, double max_speed = 90, double timeoutMs = 2500);
 void drive_straight(double inches, double max_speed = 90, double timeoutMs = 2500);
