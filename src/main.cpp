@@ -50,15 +50,15 @@ double MTP_DIST_KI = 0.0;
 double MTP_DIST_KD = 0.5;
 
 // move_to_point heading PID
-double MTP_HEAD_KP = 0.8;
+double MTP_HEAD_KP = 1.2;
 double MTP_HEAD_KI = 0.0;
 double MTP_HEAD_KD = 1.0;
-double MTP_HEAD_MAX = 50.0;  // Max turn correction
+double MTP_HEAD_MAX = 30.0;  // Max turn correction
 
 // turn_to_angle PID
-double TURN_KP = 2.5;
+double TURN_KP = 1.5;
 double TURN_KI = 0.0;
-double TURN_KD = 3.0;  // Lowered from 8.0 to reduce oscillation
+double TURN_KD = 0.3;  // Small D to dampen overshoot
 
 
 /******************************************************************************

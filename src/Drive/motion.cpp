@@ -31,9 +31,9 @@ void motion_init(Odom* odom) { g_odom = odom; }
 
 // IMPORTANT: This mixing matches your driver control exactly.
 void set_drive_mecanum(double forward, double strafe, double turn) {
-  // Flip to match teleop sign convention
+  // Flip forward to match teleop sign convention (teleop negates Y stick)
   forward = -forward;
-  turn = -turn;
+  // Note: turn is NOT flipped - teleop negates it, but PID already outputs correct sign
   
   // Match opcontrol mapping:
   // BL: y + x + turn
@@ -86,7 +86,7 @@ void turn_to_angle(double targetDeg, double max_speed, double timeoutMs) {
     double dt = (now - last) / 1000.0;
     last = now;
 
-    double t = turn.step(err, dt);
+    double t = -turn.step(err, dt);  // Negate to match motor direction
     set_drive_mecanum(0, 0, t);
 
     pros::delay(10);
@@ -144,7 +144,7 @@ void move_to_point(double targetX, double targetY, double max_speed, double time
     double targetDeg = std::atan2(dy, dx) * 180.0 / M_PI;
     double curDeg = g_odom->getHeadingDeg();
     double headingErr = wrap180(targetDeg - curDeg);
-    double turn = head.step(headingErr, dt);
+    double turn = -head.step(headingErr, dt);  // Negate to match motor direction
 
     set_drive_mecanum(forward, strafe, turn);
     pros::delay(10);
@@ -163,4 +163,53 @@ void drive_distance(double inches, double max_speed, double timeoutMs) {
   double ty = p.y + inches * std::sin(p.theta);
 
   move_to_point(tx, ty, max_speed, timeoutMs);
+}
+
+void drive_straight(double inches, double max_speed, double timeoutMs) {
+  if (!g_odom) return;
+
+  g_odom->update();
+  Pose2D start = g_odom->getPose();
+  double targetHeading = g_odom->getHeadingDeg();  // Lock current heading
+
+  PID dist(MTP_DIST_KP, MTP_DIST_KI, MTP_DIST_KD);
+  PID head(MTP_HEAD_KP, MTP_HEAD_KI, MTP_HEAD_KD);
+  dist.setOutputLimits(-max_speed, max_speed);
+  head.setOutputLimits(-MTP_HEAD_MAX, MTP_HEAD_MAX);
+
+  uint32_t startTime = pros::millis();
+  uint32_t last = startTime;
+
+  while (pros::millis() - startTime < (uint32_t)timeoutMs) {
+    g_odom->update();
+    Pose2D p = g_odom->getPose();
+
+    // Distance traveled along starting heading direction
+    double dx = p.x - start.x;
+    double dy = p.y - start.y;
+    double traveled = dx * std::cos(start.theta) + dy * std::sin(start.theta);
+    double remaining = inches - traveled;
+
+    if (std::fabs(remaining) < 0.5) break;
+
+    uint32_t now = pros::millis();
+    double dt = (now - last) / 1000.0;
+    last = now;
+
+    double forward = dist.step(remaining, dt);
+    forward = std::clamp(forward, -max_speed, max_speed);
+
+    // Slow near target
+    if (std::fabs(remaining) < 6.0) forward = std::clamp(forward, -45.0, 45.0);
+
+    // Maintain locked heading (not face target)
+    double curDeg = g_odom->getHeadingDeg();
+    double headingErr = wrap180(targetHeading - curDeg);
+    double turn = -head.step(headingErr, dt);
+
+    set_drive_mecanum(forward, 0, turn);
+    pros::delay(10);
+  }
+
+  set_drive_mecanum(0, 0, 0);
 }
