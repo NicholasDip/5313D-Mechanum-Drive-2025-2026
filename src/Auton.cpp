@@ -20,7 +20,7 @@ rd::Selector selector({
 void autonomous() {
   //selector.run_auton();
   odom.reset(-61, -17, 0);
-move_to_point(-22.521, -22.462, 220, 30, 2500);
+move_to_point(-22.521, -22.462, -220, 30, 2500);
 move_to_point(-46.702, -47.182, 90, 30, 2500);
 move_to_point(-25.358, -47.047, 90, 30, 2500);
 }
