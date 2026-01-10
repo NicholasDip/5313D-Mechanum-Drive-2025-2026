@@ -35,3 +35,13 @@ void red_right_auton() {}
 void blue_left_auton() {}
 void blue_right_auton() {}
 void skills_auton() {}
+
+
+
+
+
+//path: `// ${name}
+
+//${code}
+//`
+//moveToPoint: `move_to_point(${x}, ${y}, ${heading}, ${speed}, 2500);`
