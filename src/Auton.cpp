@@ -13,13 +13,13 @@ rd::Selector selector({
 
 void autonomous() {
   //selector.run_auton();
-  move_to_point(24, 0, 60, 2500);
-  
+  //move_to_point(24, 0, 60, 2500);
 }
 
 void red_left_auton() {
   // Test: forward 24"
-  move_to_point(24, 0, 60, 2500);
+  move_to_point(24, 0, 0, 2500);
+  turn_to_angle(90, 60, 1500);
 }
 
 void red_right_auton() {}

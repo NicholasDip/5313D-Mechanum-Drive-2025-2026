@@ -41,6 +41,25 @@ const double TRACK_WIDTH = 11.5;
 const double ROBOT_LENGTH = 11.0;
 const double TICKS_PER_REV = 360.0;
 
+/******************************************************************************
+ *                         Motion PID Tuning 
+ ******************************************************************************/
+// move_to_point distance PID
+double MTP_DIST_KP = 4.0;
+double MTP_DIST_KI = 0.0;
+double MTP_DIST_KD = 0.5;
+
+// move_to_point heading PID
+double MTP_HEAD_KP = 0.8;
+double MTP_HEAD_KI = 0.0;
+double MTP_HEAD_KD = 1.0;
+double MTP_HEAD_MAX = 50.0;  // Max turn correction
+
+// turn_to_angle PID
+double TURN_KP = 2.5;
+double TURN_KI = 0.0;
+double TURN_KD = 3.0;  // Lowered from 8.0 to reduce oscillation
+
 
 /******************************************************************************
  *                              Odom Definition

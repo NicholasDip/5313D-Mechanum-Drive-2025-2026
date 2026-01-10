@@ -8,6 +8,11 @@
 extern pros::Motor Back_left, Front_left, back_right, front_right;
 extern pros::Motor Top_back_Left, Top_front_Left, Top_back_Right, Top_front_Right;
 
+// PID tuning from main.cpp (edit there!)
+extern double MTP_DIST_KP, MTP_DIST_KI, MTP_DIST_KD;
+extern double MTP_HEAD_KP, MTP_HEAD_KI, MTP_HEAD_KD, MTP_HEAD_MAX;
+extern double TURN_KP, TURN_KI, TURN_KD;
+
 static Odom* g_odom = nullptr;
 
 static inline int clamp127(double v) {
@@ -63,7 +68,7 @@ void set_drive_mecanum(double forward, double strafe, double turn) {
 void turn_to_angle(double targetDeg, double max_speed, double timeoutMs) {
   if (!g_odom) return;
 
-  PID turn(2.5, 0.0, 8.0);
+  PID turn(TURN_KP, TURN_KI, TURN_KD);
   turn.setOutputLimits(-max_speed, max_speed);
   turn.setIntegralLimits(-5000, 5000);
 
@@ -92,10 +97,10 @@ void turn_to_angle(double targetDeg, double max_speed, double timeoutMs) {
 void move_to_point(double targetX, double targetY, double max_speed, double timeoutMs) {
   if (!g_odom) return;
 
-  PID dist(4.0, 0.0, 0.5); //Edit these If shakey 
-  PID head(1.2, 0.0, 1.0);
+  PID dist(MTP_DIST_KP, MTP_DIST_KI, MTP_DIST_KD);
+  PID head(MTP_HEAD_KP, MTP_HEAD_KI, MTP_HEAD_KD);
   dist.setOutputLimits(-max_speed, max_speed);
-  head.setOutputLimits(-50, 50);  // Limit turn correction independently
+  head.setOutputLimits(-MTP_HEAD_MAX, MTP_HEAD_MAX);
   dist.setIntegralLimits(-5000, 5000);
   head.setIntegralLimits(-5000, 5000);
 
