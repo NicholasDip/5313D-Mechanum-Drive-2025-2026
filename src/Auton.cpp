@@ -10,26 +10,30 @@ extern pros::adi::DigitalOut piston;
 extern Odom odom;
 
 rd::Selector selector({
-  {"red_left_auton", red_left_auton},
-  {"red_right_auton", red_right_auton},
-  {"blue_left_auton", blue_left_auton},
-  {"blue_right_auton", blue_right_auton},
-  {"skills_auton", skills_auton},
+    {"Red Left", red_left_auton},
+    {"Red Right", red_right_auton},
+    {"Blue Left", blue_left_auton},
+    {"Blue Right", blue_right_auton},
+    {"Skills", skills_auton},
 });
 
 void autonomous() {
-  //selector.run_auton();
-  odom.reset(-22.521, -22.462, 220);
-  
-  // Already at first point, start from second
-  move_to_point(-46.702, -47.182, 90, 30, 2500);
-  move_to_point(-25.358, -47.047, 90, 30, 2500);
+    selector.run_auton();
 }
 
+// ============================================================================
+// TEST PATH - Jerry.io Z pattern
+// ============================================================================
+
 void red_left_auton() {
-  // Test: forward 24", end facing 12°
-  move_to_point(24, 0, 12, 60, 2500);
-  move_to_point(15, 0, 0, 60, 2500);
+    // Path-based coordinates: start at (0,0) facing 90°
+    odom.reset(0, 0, 90);
+
+    move_to_point(-32.009, -21.507, 90, 30, 3000);
+    move_to_point(-48.322, -47.299, 210, 30, 3000);
+    move_to_point(-36.178, -47.742, 90, 30, 3000);
+    move_to_point(-58.758, -47.932, 90, 30, 3000);
+    move_to_point(-29.41, -48.121, 90, 30, 3000);
 }
 
 void red_right_auton() {}
@@ -37,12 +41,11 @@ void blue_left_auton() {}
 void blue_right_auton() {}
 void skills_auton() {}
 
-
-
-
-
-//path: `// ${name}
-
-//${code}
-//`
-//moveToPoint: `move_to_point(${x}, ${y}, ${heading}, ${speed}, 2500);`
+// ============================================================================
+// JERRY.IO TEMPLATE (put in Custom Export):
+//
+// path: `// ${name}
+// ${code}
+// `
+// moveToPoint: `move_to_point(${x}, ${y}, ${heading}, ${speed}, 3000);\n`
+// ============================================================================
