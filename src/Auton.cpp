@@ -19,11 +19,14 @@ rd::Selector selector({
 
 void autonomous() {
     selector.run_auton();
-}
+     odom.reset(0, 0, 90);
 
-// ============================================================================
-// TEST PATH - Jerry.io Z pattern
-// ============================================================================
+    move_to_point(-32.009, -21.507, 90, 30, 3000);
+    move_to_point(-48.322, -47.299, 210, 30, 3000);
+    //move_to_point(-36.178, -47.742, 90, 30, 3000);
+    //move_to_point(-58.758, -47.932, 90, 30, 3000);
+   // move_to_point(-29.41, -48.121, 90, 30, 3000);
+}
 
 void red_left_auton() {
     // Path-based coordinates: start at (0,0) facing 90°
