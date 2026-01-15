@@ -60,6 +60,10 @@ double TURN_KP = 1.0;       // Reduced from 1.5
 double TURN_KI = 0.0;
 double TURN_KD = 0.5;       // Increased from 0.3 for dampening
 
+//Strafe Power adjustments
+double STRAFE_MULTIPLIER = 1.3;  // Increase if strafing is sluggish (try 1.4, 1.5, 1.6)
+double MIN_STRAFE_POWER = 15.0;  // Minimum power to overcome static friction (try 20, 25)
+
 
 /******************************************************************************
  *                              Odom Definition
