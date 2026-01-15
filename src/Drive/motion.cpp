@@ -191,7 +191,7 @@ void move_to_point(double targetX, double targetY, double endHeading, double max
 
         // Angle to target - VEX standard (clockwise positive, 0° = +Y)
         // Negate atan2 result to convert from CCW to CW positive
-        double angleToTarget = -std::atan2(dx, dy) * 180.0 / M_PI;
+        double angleToTarget = std::atan2(dx, dy) * 180.0 / M_PI;
 
         double headingError = wrap180(angleToTarget - g_odom->getHeadingDeg());
 
