@@ -160,18 +160,15 @@ void drive_control(pros::Controller& master) {
 void opcontrol() {
     pros::Controller master(pros::E_CONTROLLER_MASTER);
     int lastClearTime = pros::millis();
-    const int clearInterval = 2000; // Clear every 2 seconds
+    const int clearInterval = 500; // Clear every 2 seconds
     
     while (true) {
-        // RoboDash monitoring
-       console->println("Back_left: " + std::to_string(Back_left.get_temperature()));
-       console->println("Front_left: " + std::to_string(Front_left.get_temperature()));
-       console->println("Front_right: " + std::to_string(front_right.get_temperature()));
-       console->println("Back_right: " + std::to_string(back_right.get_temperature()));
-	   console->println("Top_front_Left: " + std::to_string(Top_front_Left.get_temperature()));
-	   console->println("Top_front_Right: " + std::to_string(Top_front_Right.get_temperature()));
-	   console->println("Top_back_Left: " + std::to_string(Top_back_Left.get_temperature()));
-	   console->println("Top_back_Right: " + std::to_string(Top_back_Right.get_temperature()));
+		odom.update(); 
+        // RoboDash monitoring for Odometry 
+    	 console->println("X: " + std::to_string(odom.getX()));
+        console->println("Y: " + std::to_string(odom.getY()));
+        console->println("Heading: " + std::to_string(odom.getHeadingDeg()));
+		
         drive_control(master);
         intake_control(master);
         
