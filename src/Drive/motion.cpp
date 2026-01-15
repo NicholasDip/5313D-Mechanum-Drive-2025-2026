@@ -187,7 +187,7 @@ void move_to_point(double targetX, double targetY, double endHeading, double max
 
     // Calculate angle TO the target point
     // atan2(dx, dy) gives angle from +Y axis (0° = forward)
-    double angleToTarget = std::atan2(dx, dy) * 180.0 / M_PI;
+    double angleToTarget = -std::atan2(dx, dy) * 180.0 / M_PI;
 
     // Time allocation
     double turnTime = timeoutMs * 0.25;
