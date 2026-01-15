@@ -33,9 +33,8 @@ void motion_init(Odom* odom) {
 }
 
 // Tank-style drive (no strafe)
-// Negate forward to match physical robot direction
 void set_drive(double forward, double turn) {
-    forward = -forward;  // Invert forward direction
+    forward = -forward;  // Invert forward direction to match physical robot
     double left = forward + turn;
     double right = forward - turn;
 
@@ -60,8 +59,8 @@ void stop_drive() {
 
 // ============================================================================
 // TURN TO ANGLE - In-place rotation with settling
+// VEX Standard: 0° = +Y, 90° = +X, clockwise positive
 // ============================================================================
-
 void turn_to_angle(double targetDeg, double maxSpeed, double timeoutMs) {
     if (!g_odom) return;
 
@@ -69,7 +68,6 @@ void turn_to_angle(double targetDeg, double maxSpeed, double timeoutMs) {
     turnPID.setOutputLimits(-maxSpeed, maxSpeed);
     turnPID.setIntegralLimits(-3000, 3000);
 
-    const double ERROR_THRESHOLD = 2.0;
     const double SETTLE_THRESHOLD = 1.5;
     const int SETTLE_TIME = 100;
 
@@ -103,7 +101,7 @@ void turn_to_angle(double targetDeg, double maxSpeed, double timeoutMs) {
         double turnPower = turnPID.step(error, dt);
 
         // Min power to overcome friction
-        if (std::fabs(error) > ERROR_THRESHOLD && std::fabs(turnPower) < 15) {
+        if (std::fabs(error) > 2.0 && std::fabs(turnPower) < 15) {
             turnPower = (turnPower > 0) ? 15 : -15;
         }
 
@@ -112,13 +110,11 @@ void turn_to_angle(double targetDeg, double maxSpeed, double timeoutMs) {
     }
 
     stop_drive();
-    pros::delay(20);
 }
 
 // ============================================================================
 // DRIVE STRAIGHT - Maintain heading while driving
 // ============================================================================
-
 void drive_straight(double inches, double maxSpeed, double timeoutMs) {
     if (!g_odom) return;
 
@@ -166,76 +162,52 @@ void drive_straight(double inches, double maxSpeed, double timeoutMs) {
 }
 
 // ============================================================================
-// MOVE TO POINT - Turn-then-drive approach
+// MOVE TO POINT - Seamless (no stopping between points)
+// VEX Standard: 0° = +Y, 90° = +X, clockwise positive
 // ============================================================================
-
 void move_to_point(double targetX, double targetY, double endHeading, double maxSpeed, double timeoutMs) {
     if (!g_odom) return;
 
-    g_odom->update();
-    Pose2D start = g_odom->getPose();
-
-    double dx = targetX - start.x;
-    double dy = targetY - start.y;
-    double distance = std::sqrt(dx * dx + dy * dy);
-
-    // If already at target, just turn to final heading
-    if (distance < 1.0) {
-        turn_to_angle(endHeading, maxSpeed, timeoutMs);
-        return;
-    }
-
-    // Calculate angle TO the target point
-    // atan2(dx, dy) gives angle from +Y axis (0° = forward)
-    double angleToTarget = -std::atan2(dx, dy) * 180.0 / M_PI;
-
-    // Time allocation
-    double turnTime = timeoutMs * 0.25;
-    double driveTime = timeoutMs * 0.55;
-    double finalTurnTime = timeoutMs * 0.20;
-
-    // PHASE 1: Turn to face the target
-    turn_to_angle(angleToTarget, maxSpeed, turnTime);
-
-    // PHASE 2: Drive to the target
-    PID drivePID(MTP_DIST_KP, MTP_DIST_KI, MTP_DIST_KD);
+    PID distPID(MTP_DIST_KP, MTP_DIST_KI, MTP_DIST_KD);
     PID headPID(MTP_HEAD_KP, MTP_HEAD_KI, MTP_HEAD_KD);
-    drivePID.setOutputLimits(-maxSpeed, maxSpeed);
-    headPID.setOutputLimits(-25, 25);
+    distPID.setOutputLimits(-maxSpeed, maxSpeed);
+    headPID.setOutputLimits(-MTP_HEAD_MAX, MTP_HEAD_MAX);
+
+    const double EXIT_TOLERANCE = 2.0;  // inches - exit when this close
 
     uint32_t startTime = pros::millis();
     uint32_t lastTime = startTime;
 
-    while (pros::millis() - startTime < (uint32_t)driveTime) {
+    while (pros::millis() - startTime < (uint32_t)timeoutMs) {
         g_odom->update();
         Pose2D current = g_odom->getPose();
 
-        dx = targetX - current.x;
-        dy = targetY - current.y;
-        double remaining = std::sqrt(dx * dx + dy * dy);
+        double dx = targetX - current.x;
+        double dy = targetY - current.y;
+        double distance = std::sqrt(dx * dx + dy * dy);
 
-        if (remaining < 1.0) break;
+        // Exit when close enough - no stopping, seamless transition
+        if (distance < EXIT_TOLERANCE) break;
+
+        // Angle to target - VEX standard (clockwise positive, 0° = +Y)
+        // Negate atan2 result to convert from CCW to CW positive
+        double angleToTarget = -std::atan2(dx, dy) * 180.0 / M_PI;
+
+        double headingError = wrap180(angleToTarget - g_odom->getHeadingDeg());
 
         uint32_t now = pros::millis();
         double dt = (now - lastTime) / 1000.0;
         lastTime = now;
 
-        double drivePower = drivePID.step(remaining, dt);
-        if (remaining < 8.0) drivePower = std::clamp(drivePower, -50.0, 50.0);
-        if (remaining < 4.0) drivePower = std::clamp(drivePower, -35.0, 35.0);
+        double forward = distPID.step(distance, dt);
+        double turn = headPID.step(headingError, dt);
 
-        // Keep pointing at target while driving
-        double newAngle = std::atan2(dx, dy) * 180.0 / M_PI;
-        double headingError = wrap180(newAngle - g_odom->getHeadingDeg());
-        double turnPower = headPID.step(headingError, dt);
+        // Reduce forward power when not facing target
+        double headingScale = std::cos(headingError * M_PI / 180.0);
+        headingScale = std::max(headingScale, 0.0);
+        forward *= headingScale;
 
-        set_drive(drivePower, turnPower);
+        set_drive(forward, turn);
         pros::delay(10);
     }
-
-    stop_drive();
-    pros::delay(20);
-
-    // PHASE 3: Turn to final heading
-    turn_to_angle(endHeading, maxSpeed * 0.8, finalTurnTime);
 }
