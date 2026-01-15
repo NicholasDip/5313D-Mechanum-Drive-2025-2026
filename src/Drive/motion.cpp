@@ -33,7 +33,9 @@ void motion_init(Odom* odom) {
 }
 
 // Tank-style drive (no strafe)
+// Negate forward to match physical robot direction
 void set_drive(double forward, double turn) {
+    forward = -forward;  // Invert forward direction
     double left = forward + turn;
     double right = forward - turn;
 

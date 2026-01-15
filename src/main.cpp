@@ -45,20 +45,20 @@ const double TICKS_PER_REV = 360.0;
  *                         Motion PID Tuning 
  ******************************************************************************/
 // move_to_point distance PID
-double MTP_DIST_KP = 4.0;
+double MTP_DIST_KP = 2.0;   // Reduced from 4.0
 double MTP_DIST_KI = 0.0;
-double MTP_DIST_KD = 0.5;
+double MTP_DIST_KD = 0.8;   // Increased for more dampening
 
 // move_to_point heading PID
-double MTP_HEAD_KP = 1.2;
+double MTP_HEAD_KP = 0.8;   // Reduced from 1.2
 double MTP_HEAD_KI = 0.0;
-double MTP_HEAD_KD = 1.0;
-double MTP_HEAD_MAX = 30.0;  // Max turn correction
+double MTP_HEAD_KD = 0.5;   // Reduced from 1.0
+double MTP_HEAD_MAX = 30.0;
 
 // turn_to_angle PID
-double TURN_KP = 1.5;
+double TURN_KP = 1.0;       // Reduced from 1.5
 double TURN_KI = 0.0;
-double TURN_KD = 0.3;  // Small D to dampen overshoot
+double TURN_KD = 0.5;       // Increased from 0.3 for dampening
 
 
 /******************************************************************************
