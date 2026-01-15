@@ -13,9 +13,9 @@ extern double MTP_DIST_KP, MTP_DIST_KI, MTP_DIST_KD;
 extern double MTP_HEAD_KP, MTP_HEAD_KI, MTP_HEAD_KD, MTP_HEAD_MAX;
 extern double TURN_KP, TURN_KI, TURN_KD;
 
-// Strafe compensation - increase if strafing is sluggish
-double STRAFE_MULTIPLIER = 1.3;  // Tune this: 1.0 = no boost, 1.5 = 50% boost
-double MIN_STRAFE_POWER = 15.0;  // Minimum power to overcome static friction
+// Strafe compensation from main.cpp
+extern double STRAFE_MULTIPLIER;
+extern double MIN_STRAFE_POWER;
 
 static Odom* g_odom = nullptr;
 
