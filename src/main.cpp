@@ -94,7 +94,7 @@ rd::Console* console = nullptr;
 bool intake_flex_reversed = false;
 
 void initialize() {
-    console = new rd::Console("Motor Temps");
+    console = new rd::Console("Point Recordings");
 
 Back_left.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
 Front_left.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
@@ -164,19 +164,24 @@ void drive_control(pros::Controller& master) {
 void opcontrol() {
     pros::Controller master(pros::E_CONTROLLER_MASTER);
     int lastClearTime = pros::millis();
-    const int clearInterval = 500; // Clear every 2 seconds
+    const int clearInterval = 3000; // Clear every 1 second
     
     while (true) {
 		odom.update(); 
-        // RoboDash monitoring for Odometry 
+         drive_control(master);
+        intake_control(master);
+		
+/******************************************************************************
+ *                           Controls and Scripts 
+ ******************************************************************************/
+		
+		// RoboDash monitoring for Odometry 
     	 console->println("X: " + std::to_string(odom.getX()));
         console->println("Y: " + std::to_string(odom.getY()));
         console->println("Heading: " + std::to_string(odom.getHeadingDeg()));
+
 		
-        drive_control(master);
-        intake_control(master);
-        
-        // Pneumatic control - Toggle with L1 button
+        // Pneumatic control for Hood/wing
         if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_A)) {
             isPistonOpen = !isPistonOpen;
             piston.set_value(isPistonOpen);
