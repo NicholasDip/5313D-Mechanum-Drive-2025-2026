@@ -8,6 +8,20 @@
 extern pros::Motor intake_bottom, intake_top, intake_flex;
 extern pros::adi::DigitalOut piston;
 extern Odom odom;
+/******************************************************************************
+ *                         Motion PID Tuning 
+ ******************************************************************************/
+// move_to_point distance PID
+double MTP_DIST_KP = 2.0;   
+double MTP_DIST_KI = 0.0;
+double MTP_DIST_KD = 0.5;   // Increase for more Dampening
+
+// move_to_point heading PID
+double MTP_HEAD_KP = 2.5; // Creates more agressive turning 
+double MTP_HEAD_KI = 0.0;
+double MTP_HEAD_KD = 0.5;   
+double MTP_HEAD_MAX = 40.0 // More Turn Power      
+
 
 rd::Selector selector({
     {"Red Left", red_left_auton},
