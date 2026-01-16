@@ -35,6 +35,7 @@ void motion_init(Odom* odom) {
 // Tank-style drive (no strafe)
 void set_drive(double forward, double turn) {
     forward = -forward;  // Invert forward direction to match physical robot
+    turn = -turn;        // Invert turn direction to match physical robot
     double left = forward + turn;
     double right = forward - turn;
 
@@ -173,7 +174,7 @@ void move_to_point(double targetX, double targetY, double endHeading, double max
     distPID.setOutputLimits(-maxSpeed, maxSpeed);
     headPID.setOutputLimits(-MTP_HEAD_MAX, MTP_HEAD_MAX);
 
-    const double EXIT_TOLERANCE = 2.0;  // inches - exit when this close
+    const double EXIT_TOLERANCE = 3.0;  // inches - exit when this close
 
     uint32_t startTime = pros::millis();
     uint32_t lastTime = startTime;
@@ -189,9 +190,9 @@ void move_to_point(double targetX, double targetY, double endHeading, double max
         // Exit when close enough - no stopping, seamless transition
         if (distance < EXIT_TOLERANCE) break;
 
-        // Angle to target - VEX standard (clockwise positive, 0° = +Y)
-        // Negate atan2 result to convert from CCW to CW positive
-        double angleToTarget = std::atan2(dx, dy) * 180.0 / M_PI;
+        // Angle to target for convention: +X forward, +Y right, CW positive
+        // atan2(dy, dx) gives 0° when target is in +X direction (forward)
+        double angleToTarget = std::atan2(dy, dx) * 180.0 / M_PI;
 
         double headingError = wrap180(angleToTarget - g_odom->getHeadingDeg());
 
@@ -207,7 +208,15 @@ void move_to_point(double targetX, double targetY, double endHeading, double max
         headingScale = std::max(headingScale, 0.0);
         forward *= headingScale;
 
+        // Reduce turn correction when close (angle gets unstable near target)
+        if (distance < 4.0) {
+            turn *= (distance / 4.0);  // Linearly reduce turn as we approach
+        }
+
         set_drive(forward, turn);
         pros::delay(10);
     }
+
+    // No stop - seamless transition to next move_to_point
+    // endHeading param unused in seamless mode
 }

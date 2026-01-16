@@ -47,10 +47,10 @@ const double TICKS_PER_REV = 360.0;
 // move_to_point distance PID
 double MTP_DIST_KP = 2.0;   // Reduced from 4.0
 double MTP_DIST_KI = 0.0;
-double MTP_DIST_KD = 0.8;   // Increased for more dampening
+double MTP_DIST_KD = 0.5;   // Increased for more dampening
 
 // move_to_point heading PID
-double MTP_HEAD_KP = 0.8;   // Reduced from 1.2
+double MTP_HEAD_KP = 3.0;   
 double MTP_HEAD_KI = 0.0;
 double MTP_HEAD_KD = 0.5;   // Reduced from 1.0
 double MTP_HEAD_MAX = 30.0;
@@ -90,7 +90,7 @@ rd::Console* console = nullptr;
 bool intake_flex_reversed = false;
 
 void initialize() {
-    console = new rd::Console("Motor Temps");
+    console = new rd::Console("Odom Console");
 
 Back_left.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
 Front_left.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
@@ -160,7 +160,7 @@ void drive_control(pros::Controller& master) {
 void opcontrol() {
     pros::Controller master(pros::E_CONTROLLER_MASTER);
     int lastClearTime = pros::millis();
-    const int clearInterval = 500; // Clear every 2 seconds
+    const int clearInterval = 4000; // Clear every 2 seconds
     
     while (true) {
 		odom.update(); 
