@@ -42,26 +42,6 @@ const double ROBOT_LENGTH = 11.0;
 const double TICKS_PER_REV = 360.0;
 
 /******************************************************************************
- *                         Motion PID Tuning 
- ******************************************************************************/
-// move_to_point distance PID
-double MTP_DIST_KP = 2.0;   // Reduced from 4.0
-double MTP_DIST_KI = 0.0;
-double MTP_DIST_KD = 0.5;   // Increased for more dampening
-
-// move_to_point heading PID
-double MTP_HEAD_KP = 3.0;   
-double MTP_HEAD_KI = 0.0;
-double MTP_HEAD_KD = 0.5;   // Reduced from 1.0
-double MTP_HEAD_MAX = 30.0;
-
-// turn_to_angle PID
-double TURN_KP = 1.0;       // Reduced from 1.5
-double TURN_KI = 0.0;
-double TURN_KD = 0.5;       // Increased from 0.3 for dampening
-
-
-/******************************************************************************
  *                              Odom Definition
  ******************************************************************************/
 // Create odom object (invert flags may need flipping after a push test)
