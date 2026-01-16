@@ -17,10 +17,10 @@ double MTP_DIST_KI = 0.0;
 double MTP_DIST_KD = 0.5;   // Increase for more Dampening
 
 // move_to_point heading PID
-double MTP_HEAD_KP = 2.5; // Creates more agressive turning 
+double MTP_HEAD_KP = 6.0; // Creates more agressive turning 
 double MTP_HEAD_KI = 0.0;
 double MTP_HEAD_KD = 0.5;   
-double MTP_HEAD_MAX = 40.0 // More Turn Power      
+double MTP_HEAD_MAX = 90.0; // More Turn Power      
 
 
 rd::Selector selector({
@@ -35,8 +35,8 @@ void autonomous() {
     //selector.run_auton();
      odom.reset(0, 0, 0);
 
-    move_to_point(31, 0, 0, 40, 3000);
-    move_to_point(8.1 ,34.5, 150, 40, 3000);
+    move_to_point(31, 0, 0, 50, 3000);
+    move_to_point(8.1 , 41, 150, 50, 4000);
     
 }
 
