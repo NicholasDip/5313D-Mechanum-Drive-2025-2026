@@ -27,8 +27,8 @@ void autonomous() {
   drive_straight(35, 35, 2000);
  
   turn_to_angle(-140, 60, 2000);   // Turn to 90 degrees heading
-  drive_straight(33.5, 35, 2000);
-  turn_to_angle(-188, 60, 1000);
+  drive_straight(35, 45, 2000);
+  turn_to_angle(-190, 60, 1000);
   drive_straight(-24, 60, 1000);
   piston.set_value(true);
 
