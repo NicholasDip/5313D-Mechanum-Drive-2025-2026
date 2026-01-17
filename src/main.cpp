@@ -70,6 +70,7 @@ rd::Console* console = nullptr;
 bool intake_flex_reversed = false;
 
 void initialize() {
+
     console = new rd::Console("Odom Console");
 
 Back_left.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
@@ -89,6 +90,12 @@ while (imu.is_calibrating()) pros::delay(20);
 
 odom.reset(0, 0, 0);
   motion_init(&odom);
+
+   // move_to_point(24, 0, 0, 60, 2000);
+   // move_to_point(8.1 , 41, 170, 50, 3000);
+
+
+
 } 
 
 /**

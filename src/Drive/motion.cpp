@@ -178,6 +178,7 @@ void move_to_point(double targetX, double targetY, double endHeading, double max
 
     uint32_t startTime = pros::millis();
     uint32_t lastTime = startTime;
+    bool atPosition = false;  // Lock in heading mode once at position
 
     while (pros::millis() - startTime < (uint32_t)timeoutMs) {
         g_odom->update();
@@ -187,14 +188,32 @@ void move_to_point(double targetX, double targetY, double endHeading, double max
         double dy = targetY - current.y;
         double distance = std::sqrt(dx * dx + dy * dy);
 
-        // Exit when close enough - no stopping, seamless transition
-        if (distance < EXIT_TOLERANCE) break;
+        // Lock in position once reached
+        if (distance < EXIT_TOLERANCE) {
+            atPosition = true;
+        }
 
-        // Angle to target for convention: +X forward, +Y right, CW positive
-        // atan2(dy, dx) gives 0° when target is in +X direction (forward)
-        double angleToTarget = std::atan2(dy, dx) * 180.0 / M_PI;
+        // Exit when at position AND heading is close
+        double headingToEnd = std::fabs(wrap180(endHeading - g_odom->getHeadingDeg()));
+        if (atPosition && headingToEnd < 10.0) break;
 
-        double headingError = wrap180(angleToTarget - g_odom->getHeadingDeg());
+        // Calculate heading error
+        double headingError;
+        if (atPosition) {
+            // At position: directly target endHeading
+            headingError = wrap180(endHeading - g_odom->getHeadingDeg());
+        } else {
+            // Moving: blend between angleToTarget and endHeading
+            double angleToTarget = std::atan2(dy, dx) * 180.0 / M_PI;
+            double blendFactor = 0.0;
+            if (distance < 12.0) {
+                blendFactor = (12.0 - distance) / (12.0 - EXIT_TOLERANCE);
+                if (blendFactor > 1.0) blendFactor = 1.0;
+            }
+            double targetAngleDiff = wrap180(endHeading - angleToTarget);
+            double desiredHeading = angleToTarget + targetAngleDiff * blendFactor;
+            headingError = wrap180(desiredHeading - g_odom->getHeadingDeg());
+        }
 
         uint32_t now = pros::millis();
         double dt = (now - lastTime) / 1000.0;
@@ -203,14 +222,14 @@ void move_to_point(double targetX, double targetY, double endHeading, double max
         double forward = distPID.step(distance, dt);
         double turn = headPID.step(headingError, dt);
 
-        // Reduce forward power when not facing target
-        double headingScale = std::cos(headingError * M_PI / 180.0);
-        headingScale = std::max(headingScale, 0.0);
-        forward *= headingScale;
-
-        // Reduce turn correction when close (angle gets unstable near target)
-        if (distance < 4.0) {
-            turn *= (distance / 4.0);  // Linearly reduce turn as we approach
+        // At position: only turn, no forward movement
+        if (atPosition) {
+            forward = 0;
+        } else {
+            // Reduce forward power when not facing target
+            double headingScale = std::cos(headingError * M_PI / 180.0);
+            headingScale = std::max(headingScale, 0.0);
+            forward *= headingScale;
         }
 
         set_drive(forward, turn);
@@ -218,5 +237,4 @@ void move_to_point(double targetX, double targetY, double endHeading, double max
     }
 
     // No stop - seamless transition to next move_to_point
-    // endHeading param unused in seamless mode
 }

@@ -12,16 +12,16 @@ extern Odom odom;
  *                         Motion PID Tuning 
  ******************************************************************************/
 // move_to_point distance PID
-double MTP_DIST_KP = 2.0;   
+double MTP_DIST_KP = 3.8; //Adjust this first till target reach
 double MTP_DIST_KI = 0.0;
-double MTP_DIST_KD = 0.5;   // Increase for more Dampening
+double MTP_DIST_KD = 0.0;   // Increase for more Dampening / Overshute
 
 // move_to_point heading PID
-double MTP_HEAD_KP = 6.0; // Creates more agressive turning 
+double MTP_HEAD_KP = 1.0; //Adjust this first till target reach 
 double MTP_HEAD_KI = 0.0;
-double MTP_HEAD_KD = 0.5;   
-double MTP_HEAD_MAX = 90.0; // More Turn Power      
-
+double MTP_HEAD_KD = 0.0;  //if overshute increase  
+double MTP_HEAD_MAX = 80.0; // More Turn Power      
+double MTP_HEAD_MIN = 10.0; // Less Turn Power
 
 rd::Selector selector({
     {"Red Left", red_left_auton},
@@ -35,8 +35,8 @@ void autonomous() {
     //selector.run_auton();
      odom.reset(0, 0, 0);
 
-    move_to_point(31, 0, 0, 50, 3000);
-    move_to_point(8.1 , 41, 150, 50, 4000);
+    move_to_point(24, 0, 0, 30, 3500);
+    move_to_point(8.1 , 35, 160, 35, 3000);
     
 }
 
