@@ -17,11 +17,11 @@ double MTP_DIST_KI = 0.0;
 double MTP_DIST_KD = 0.0;   // Increase for more Dampening / Overshute
 
 // move_to_point heading PID
-double MTP_HEAD_KP = 1.0; //Adjust this first till target reach 
+double MTP_HEAD_KP = 1.1; // Higher KP since KD will dampen
 double MTP_HEAD_KI = 0.0;
-double MTP_HEAD_KD = 0.0;  //if overshute increase  
-double MTP_HEAD_MAX = 80.0; // More Turn Power      
-double MTP_HEAD_MIN = 10.0; // Less Turn Power
+double MTP_HEAD_KD = 0.0;  // Damping to prevent overshoot  
+double MTP_HEAD_MAX = 60.0; // More Turn Power      
+double MTP_HEAD_MIN = 20.0; // Less Turn Power
 
 rd::Selector selector({
     {"Red Left", red_left_auton},
@@ -36,7 +36,7 @@ void autonomous() {
      odom.reset(0, 0, 0);
 
     move_to_point(24, 0, 0, 30, 3500);
-    move_to_point(8.1 , 35, 160, 35, 3000);
+    move_to_point(8.1 , 35, 165, 35, 3000);
     
 }
 

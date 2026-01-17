@@ -189,8 +189,9 @@ void move_to_point(double targetX, double targetY, double endHeading, double max
         double distance = std::sqrt(dx * dx + dy * dy);
 
         // Lock in position once reached
-        if (distance < EXIT_TOLERANCE) {
+        if (distance < EXIT_TOLERANCE && !atPosition) {
             atPosition = true;
+            headPID.reset();  // Reset PID to avoid derivative spike
         }
 
         // Exit when at position AND heading is close
@@ -203,16 +204,9 @@ void move_to_point(double targetX, double targetY, double endHeading, double max
             // At position: directly target endHeading
             headingError = wrap180(endHeading - g_odom->getHeadingDeg());
         } else {
-            // Moving: blend between angleToTarget and endHeading
+            // Moving: face the target point (no blending)
             double angleToTarget = std::atan2(dy, dx) * 180.0 / M_PI;
-            double blendFactor = 0.0;
-            if (distance < 12.0) {
-                blendFactor = (12.0 - distance) / (12.0 - EXIT_TOLERANCE);
-                if (blendFactor > 1.0) blendFactor = 1.0;
-            }
-            double targetAngleDiff = wrap180(endHeading - angleToTarget);
-            double desiredHeading = angleToTarget + targetAngleDiff * blendFactor;
-            headingError = wrap180(desiredHeading - g_odom->getHeadingDeg());
+            headingError = wrap180(angleToTarget - g_odom->getHeadingDeg());
         }
 
         uint32_t now = pros::millis();
